@@ -1,0 +1,170 @@
+{
+    "name": "German Vocab Logger (Telegram → AI → Sheets + Reply)",
+    "nodes": [
+        {
+            "parameters": {
+                "updates": [
+                    "message"
+                ],
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                1680,
+                320
+            ],
+            "id": "217bb200-9f41-4d56-9a8b-d3b3c8afcad1",
+            "name": "Telegram Trigger1",
+            "webhookId": "af544661-2f44-47ad-bff9-e149a4124de5",
+            "credentials": {
+                "telegramApi": {
+                    "id": "cKy30xYHWkiM0iCM",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "model": {
+                    "__rl": true,
+                    "value": "o3-mini",
+                    "mode": "list",
+                    "cachedResultName": "o3-mini"
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1.2,
+            "position": [
+                1872,
+                544
+            ],
+            "id": "d1094d0e-1fd4-4beb-b1b9-1f21ba759e47",
+            "name": "OpenAI Chat Model1",
+            "credentials": {
+                "openAiApi": {
+                    "id": "3YMWXW6t4VTdXRhW",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.message.text }}",
+                "options": {
+                    "systemMessage": "You are a German A1/A2 vocabulary tutor. The user sends ONE German word or short phrase.\n\nOutput MUST be exactly two blocks in this order:\n\nBLOCK 1 (Telegram):\nReturn ONLY the final message for Telegram. Do NOT write “PART 1”, “BLOCK 1”, headings like “Telegram reply”, or any labels. Keep it short.\n\nFormat:\n- First line: **<word/phrase>** (<POS>, include article der/die/das if noun)\n- Then: EN: ...\n- Then: DE (einfach): ...\n- Then: Beispiel: ... / EN: ...\n\nBLOCK 2 (SheetsLog):\nOn a new line write exactly:\nSHEET_LOG:\nThen output ONE single line using | as separator:\nYYYY-MM-DD | word_or_phrase | POS | article(optional) | meaning_en | simple_de | example_de | example_en\n\nRules:\n- Use today's date in Europe/Berlin.\n- No extra text before/after these two blocks."
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1.7,
+            "position": [
+                2048,
+                320
+            ],
+            "id": "6875c425-b660-4be6-acef-1177d8a812f7",
+            "name": "AI Agent1"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+                "text": "={{ ($json.output || '').split('SHEET_LOG:')[0].trim() }}",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                2464,
+                320
+            ],
+            "id": "aa685622-e0c1-4779-99c7-2e098f898ed9",
+            "name": "Telegram Reply1",
+            "credentials": {
+                "telegramApi": {
+                    "id": "cKy30xYHWkiM0iCM",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": "REPLACE_WITH_YOUR_SHEET_ID",
+                "sheetName": "Sheet1",
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Date": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[0] }}",
+                        "Word/Phrase": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[1] }}",
+                        "POS": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[2] }}",
+                        "Article": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[3] }}",
+                        "Meaning_EN": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[4] }}",
+                        "Simple_DE": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[5] }}",
+                        "Example_DE": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[6] }}",
+                        "Example_EN": "={{ ($json.output.split('SHEET_LOG:')[1] || '').trim().split(' | ')[7] }}"
+                    }
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                2464,
+                544
+            ],
+            "id": "b5a54c6f-0c72-4e6f-9b7a-7f0d4ab2c1c1",
+            "name": "Append to Google Sheet",
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "ehuQ6XJTbeKlFUTg",
+                    "name": "Google Sheets account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Telegram Trigger1": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OpenAI Chat Model1": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent1",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent1": {
+            "main": [
+                [
+                    {
+                        "node": "Telegram Reply1",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Append to Google Sheet",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

@@ -1,0 +1,172 @@
+{
+  "name": "German Vocab Logger (Telegram → AI → Docs + Reply)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        -256
+      ],
+      "id": "2db84caf-6f27-44e1-bd52-8499e3e5674e",
+      "name": "Telegram Trigger",
+      "webhookId": "af544661-2f44-47ad-bff9-e149a4124de5",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "o3-mini",
+          "mode": "list",
+          "cachedResultName": "o3-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        -32
+      ],
+      "id": "fd81645e-a101-40a2-81cd-a26f7ed7df37",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3YMWXW6t4VTdXRhW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a German A1/A2 vocabulary tutor. The user sends ONE German word or short phrase.\n\nReturn TWO parts:\n\nPART 1 (Telegram reply):\n- Word + article if noun (der/die/das) + POS\n- English meaning\n- Simple German explanation\n- One A1/A2 example sentence in German + English translation\n\nPART 2 (for Google Docs):\nStart a new line with exactly: DOC_LOG:\nThen output ONE single-line entry like:\nYYYY-MM-DD | word | POS | EN meaning | Example DE\n\nUse today's date in Europe/Berlin.\nNo JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1024,
+        -256
+      ],
+      "id": "70350d0d-3f01-4832-a916-07b06717e613",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "https://docs.google.com/document/d/1Pu8V461iIyIL5gGCCDUtppAxZ14O8JBfWrUJwHnuk1U/edit?usp=sharing",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ ($json.output || '').includes('DOC_LOG:') ? ('\\n' + ($json.output || '').split('DOC_LOG:')[1].trim()) : ('\\n' + ($json.output || '')) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -32
+      ],
+      "id": "3ba34ddf-c307-43ed-b9ee-efab4d77ee01",
+      "name": "Update Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "ehuQ6XJTbeKlFUTg",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "={{ ($json.output || '').split('DOC_LOG:')[0].trim() }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        -256
+      ],
+      "id": "9aec61eb-52a6-4432-9413-815d6667ff1a",
+      "name": "Telegram Reply",
+      "webhookId": "ac37d68b-a6d2-4d55-98f0-0138f93d4dc5",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update Google Docs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "fixed-main-branch",
+  "meta": {
+    "instanceId": "2214a042eb3154f2274e6e3265a1e2e050297f72ee4758a8d9473c4a8978ff3a"
+  },
+  "id": "1FTpQHeHsfDeyKcpoIn5f",
+  "tags": []
+}
