@@ -1,0 +1,1040 @@
+{
+  "name": "German Vocab Logger (Telegram → Lookup → AI → Sheets + Reply)",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI",
+          "mode": "list",
+          "cachedResultName": "German a2 vocab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Word": "={{ $json.word_or_phrase }}",
+            "POS": "={{ $json.pos }}",
+            "Article": "={{ $json.article }}",
+            "Simple_DE": "={{ $json.simple_de }}",
+            "Meaning_EN": "={{ $json.meaning_en }}",
+            "Example_DE": "={{ $json.example_de }}",
+            "Example_EN": "={{ $json.example_en }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Word",
+              "displayName": "Word",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POS",
+              "displayName": "POS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Article",
+              "displayName": "Article",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meaning_EN",
+              "displayName": "Meaning_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Simple_DE",
+              "displayName": "Simple_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_DE",
+              "displayName": "Example_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_EN",
+              "displayName": "Example_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        4080,
+        992
+      ],
+      "id": "d9e0aeb0-3b59-42df-a31d-8d1869460cbf",
+      "name": "Append to Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Dm4VfZlwVBEOvvLv",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        3056,
+        880
+      ],
+      "id": "eceec217-1546-4b1a-b6b9-5cf3c3de0bd6",
+      "name": "Telegram Trigger",
+      "webhookId": "af544661-2f44-47ad-bff9-e149a4124de5",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "chatgpt-4o-latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3248,
+        1104
+      ],
+      "id": "eb53a5de-08ed-42fc-a7aa-85ad3689fcfd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3YMWXW6t4VTdXRhW",
+          "name": "OpenAi account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a German A1/A2 vocabulary tutor.\n\nThe user sends ONE German word or short phrase.\n\nYou MUST output ONLY a single valid JSON object.\n❌ No markdown\n❌ No headings\n❌ No explanations\n❌ No extra text\n❌ No code fences\n\nThe JSON MUST follow this exact schema.\nAll keys are REQUIRED.\nIf a value is not applicable, use an empty string \"\".\n\n{\n  \"telegram_text\": \"string\",\n  \"date\": \"YYYY-MM-DD\",\n  \"word_or_phrase\": \"string\",\n  \"pos\": \"string\",\n  \"article\": \"der|die|das|\",\n  \"meaning_en\": \"string\",\n  \"simple_de\": \"string\",\n  \"example_de\": \"string\",\n  \"example_en\": \"string\",\n  \"tags\": [\"string\"]\n}\n\nRules:\n\n1. date must be TODAY in Europe/Berlin timezone.\n2. article:\n   - Use \"der\", \"die\", or \"das\" ONLY if the word is a noun.\n   - Otherwise use \"\".\n3. pos examples:\n   - Nomen\n   - Verb\n   - Adjektiv\n   - Interjektion\n   - Phrase\n4. simple_de must be a VERY EASY German explanation (A1/A2 level).\n5. example_de must be a natural A1/A2 sentence.\n6. example_en must be the correct English translation of example_de.\n7. tags must contain 1–3 short tags like:\n   - \"A1\"\n   - \"A2\"\n   - \"Alltag\"\n   - \"Begrüßung\"\n   - \"Uni\"\n8. telegram_text MUST be plain text (Telegram-friendly) and MUST follow this EXACT format:\n\n<word_or_phrase> (<pos>, <article if any>)\nEN: <meaning_en>\nDE (einfach): <simple_de>\nBeispiel: <example_de> \nEN: <example_en>\n\n9. Return ONLY the JSON object. Nothing else."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        3488,
+        896
+      ],
+      "id": "4f45cdd1-6e7e-4c57-b15e-0ee0566d7369",
+      "name": "AI Agent",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4224,
+        784
+      ],
+      "id": "89ed6955-646a-41de-aedf-eac4298f84d2",
+      "name": "Telegram Reply",
+      "webhookId": "f8789fe9-71bd-4d2b-8ead-9f691807592e",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\nlet parsed;\n\ntry {\n  parsed = typeof raw === \"string\" ? JSON.parse(raw) : raw;\n} catch (e) {\n  throw new Error(\"AI output is not valid JSON:\\n\" + raw);\n}\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3776,
+        880
+      ],
+      "id": "edabc698-f7ab-4a6b-8526-9ca1197f6e9d",
+      "name": "Code in JavaScript",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = ($json.message?.text || \"\").trim();\nconst user_id = $json.message?.chat?.id;\n\n// Normalize key for lookup\nconst key = text\n  .toLowerCase()\n  .replace(/[’']/g, \"\")\n  .replace(/[^\\p{L}\\p{N}\\s-]+/gu, \"\")\n  .replace(/\\s+/g, \" \")\n  .trim();\n\n// Combined lookup key (user-specific)\nconst lookup_key = `${user_id}${key}`;\n\n// Get current time in Europe/Berlin\nconst now = new Date(\n  new Date().toLocaleString(\"en-US\", { timeZone: \"Europe/Berlin\" })\n);\n\n// Format date and datetime\nconst date = now.toISOString().slice(0, 10); // YYYY-MM-DD\nconst datetime = now.toISOString(); // full ISO timestamp\n\nreturn [{\n  json: {\n    ...$json,\n    input_text: text,\n    user_id,\n    key,\n    lookup_key,\n    date,\n    datetime\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3664,
+        1616
+      ],
+      "id": "9d624f52-abf6-4d7e-a0fa-680982c98bce",
+      "name": "Normalize (user_id + key)"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI",
+          "mode": "list",
+          "cachedResultName": "German a2 vocab"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "lookup_key",
+              "lookupValue": "={{ $json.lookup_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        3856,
+        1616
+      ],
+      "id": "9d77ef83-aabd-477b-a368-b3c4e92e6bfd",
+      "name": "Get Row (by user_id + key)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Dm4VfZlwVBEOvvLv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "e93cb59a-a26c-4f95-83f7-07663cb7f6dd",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        4064,
+        1616
+      ],
+      "id": "a0d9cbcb-693d-4c16-ad7a-41041d359127",
+      "name": "IF Found?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $items('Get Row (by user_id + key)')[0].json;\nconst today = new Date().toISOString().slice(0,10);\nconst lookups = Number(row.lookups || 0) + 1;\n\nreturn [{\n  json: {\n    telegram_text: row.telegram_text || `${row.Word || row.word_or_phrase} (${row.POS || row.pos})\\nEN: ${row.Meaning_EN || row.meaning_en}\\nDE (einfach): ${row.Simple_DE || row.simple_de}\\nBeispiel: ${row.Example_DE || row.example_de}\\nEN: ${row.Example_EN || row.example_en}`,\n    row_number: row.rowNumber || row.row_number || row.__rowNumber || row.row || row.Row || \"\",\n    updates: { lookups, last_seen: today }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4256,
+        1504
+      ],
+      "id": "cca6f6cf-8550-409a-8d46-eca7e4163a97",
+      "name": "Prepare Found Reply + Counters"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4656,
+        1472
+      ],
+      "id": "02e163c6-6b8e-4524-bc90-f6e16af5d0f9",
+      "name": "Telegram Reply (Found)",
+      "webhookId": "4724dbbe-60df-4bac-9009-040319c4b211",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI",
+          "mode": "list",
+          "cachedResultName": "German a2 vocab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "={{ $('Normalize (user_id + key)').item.json.user_id }}",
+            "last_seen": "={{ $('Normalize (user_id + key)').item.json.datetime }}",
+            "lookups": "={{ $json.updates.lookups }}",
+            "lookup_key": "={{ $('Normalize (user_id + key)').item.json.lookup_key }}"
+          },
+          "matchingColumns": [
+            "lookup_key"
+          ],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Word",
+              "displayName": "Word",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POS",
+              "displayName": "POS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Article",
+              "displayName": "Article",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meaning_EN",
+              "displayName": "Meaning_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Simple_DE",
+              "displayName": "Simple_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_DE",
+              "displayName": "Example_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_EN",
+              "displayName": "Example_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lookups",
+              "displayName": "lookups",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "first_seen",
+              "displayName": "first_seen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_seen",
+              "displayName": "last_seen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lookup_key",
+              "displayName": "lookup_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        4656,
+        1600
+      ],
+      "id": "3a9e4713-f824-4228-8755-21941e453e75",
+      "name": "Update Row (lookups + last_seen)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Dm4VfZlwVBEOvvLv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\nlet parsed;\ntry { parsed = typeof raw === 'string' ? JSON.parse(raw) : raw; }\ncatch (e) { throw new Error('AI output is not valid JSON:\\n' + raw); }\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4368,
+        1808
+      ],
+      "id": "873d127b-7abb-4041-9749-09656b2d7055",
+      "name": "Parse AI JSON"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4656,
+        1824
+      ],
+      "id": "29d51c9c-9b8f-40cb-ab27-eee444771a0a",
+      "name": "Telegram Reply (New)",
+      "webhookId": "444e97ba-4584-43db-9fcc-3f4e04f29fe7",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nQ05mxwafG_HMkxV8Hxl_tR_PfD0T7PFevHMrhAHAoI",
+          "mode": "list",
+          "cachedResultName": "German a2 vocab"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Word": "={{ $json.word_or_phrase }}",
+            "POS": "={{ $json.pos }}",
+            "Article": "={{ $json.article }}",
+            "Simple_DE": "={{ $json.simple_de }}",
+            "Meaning_EN": "={{ $json.meaning_en }}",
+            "Example_DE": "={{ $json.example_de }}",
+            "Example_EN": "={{ $json.example_en }}",
+            "user_id": "={{ $('Normalize (user_id + key)').item.json.user_id }}",
+            "key": "={{ $('Normalize (user_id + key)').item.json.key }}",
+            "first_seen": "={{ $json.datetime }}",
+            "last_seen": "={{ $json.datetime }}",
+            "lookups": "0",
+            "lookup_key": "={{ $('Normalize (user_id + key)').item.json.lookup_key }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Word",
+              "displayName": "Word",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POS",
+              "displayName": "POS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Article",
+              "displayName": "Article",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meaning_EN",
+              "displayName": "Meaning_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Simple_DE",
+              "displayName": "Simple_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_DE",
+              "displayName": "Example_DE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example_EN",
+              "displayName": "Example_EN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lookups",
+              "displayName": "lookups",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "first_seen",
+              "displayName": "first_seen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_seen",
+              "displayName": "last_seen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lookup_key",
+              "displayName": "lookup_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        4640,
+        2048
+      ],
+      "id": "af2f7b03-cf9f-4a42-b67c-f3e6f5476db6",
+      "name": "Append New Row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Dm4VfZlwVBEOvvLv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        3456,
+        1616
+      ],
+      "id": "dfa71e0f-ac18-42d0-8dd2-8e4d04b4f2fe",
+      "name": "Telegram Trigger1",
+      "webhookId": "af544661-2f44-47ad-bff9-e149a4124de5",
+      "credentials": {
+        "telegramApi": {
+          "id": "cKy30xYHWkiM0iCM",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "chatgpt-4o-latest"
+        },
+        "options": {
+          "maxTokens": 500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3824,
+        2128
+      ],
+      "id": "a536c001-1ed8-464f-b22e-6df634ea3069",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "3YMWXW6t4VTdXRhW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger1').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a German A1/A2 vocabulary tutor.\n\n\nThe user sends ONE German word or ONE short phrase.\n\nYou must return ONLY one valid JSON object.\n❌ No markdown\n❌ No explanations\n❌ No extra text\n❌ No ellipsis (...)\n✅ Every key must exist\n\nIf a value is not applicable, use an empty string \"\".\n\n⸻\n\nOUTPUT SCHEMA (ALL KEYS REQUIRED)\n\n{\n“telegram_text”: “string”,\n“date”: “YYYY-MM-DD”,\n“datetime”: “YYYY-MM-DDTHH:mm:ss+01:00”,\n“word_or_phrase”: “string”,\n“pos”: “string”,\n“article”: “der|die|das|”,\n“meaning_en”: “string”,\n“simple_de”: “string”,\n“example_de”: “string”,\n“example_en”: “string”,\n“tags”: [“string”]\n}\n\n⸻\nTodays date is {{ $('Normalize (user_id + key)').item.json.datetime }}\n\nTIME RULES\n\t1.\tdate = TODAY in Europe/Berlin timezone (YYYY-MM-DD).\n\t2.\tdatetime = CURRENT time in Europe/Berlin timezone, ISO 8601:\n\t•\tYYYY-MM-DDTHH:mm:ss+01:00\n\t•\tUse +02:00 during daylight saving time.\n\n⸻\n\nGRAMMAR RULES\n\t3.\tarticle\n\t•\tUse only der, die, or das if the word is a noun (Nomen).\n\t•\tOtherwise use \"\".\n\t4.\tpos must be one of:\n\t•\tNomen\n\t•\tVerb\n\t•\tAdjektiv\n\t•\tAdverb\n\t•\tInterjektion\n\t•\tPhrase\n\n⸻\n\nCONTENT RULES\n\t5.\tsimple_de must be a very easy A1/A2 German explanation.\n\t6.\texample_de must be a natural A1/A2 sentence.\n\t7.\texample_en must be the correct English translation of example_de.\n\t8.\ttags must contain 1–3 short tags, e.g.:\n\t•\t\"A1\"\n\t•\t\"A2\"\n\t•\t\"Alltag\"\n\t•\t\"Uni\"\n\t•\t\"Begrüßung\"\n\n⸻\n\nTELEGRAM TEXT FORMAT (VERY IMPORTANT)\n\ntelegram_text MUST be plain text and follow EXACTLY one of the formats below.\n\nIf the word is a NOUN:\n<word_or_phrase> (, )\nEN: <meaning_en>\nDE (einfach): <simple_de>\nBeispiel: <example_de>\nEN: <example_en>\n\nIf the word is NOT a noun:\n<word_or_phrase> ()\nEN: <meaning_en>\nDE (einfach): <simple_de>\nBeispiel: <example_de>\nEN: <example_en>\n\n❗ Do NOT show an empty article\n❗ Do NOT add extra lines\n❗ Do NOT change wording\n\n⸻\n\nIMPORTANT SAFETY RULES\n\t•\tAlways complete the JSON object fully.\n\t•\tNever use ....\n\t•\tKeep explanations concise if the input phrase is long.\n\t•\tOutput ONLY the JSON object.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        4064,
+        1856
+      ],
+      "id": "5897b4b4-d519-46a6-9836-de06496f1fec",
+      "name": "AI Agent1"
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 925464262,
+          "message": {
+            "message_id": 578,
+            "from": {
+              "id": 1010134644,
+              "is_bot": false,
+              "first_name": "Gaurav",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 1010134644,
+              "first_name": "Gaurav",
+              "type": "private"
+            },
+            "date": 1768398278,
+            "text": "entshuldigung"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize (user_id + key)": {
+      "main": [
+        [
+          {
+            "node": "Get Row (by user_id + key)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Row (by user_id + key)": {
+      "main": [
+        [
+          {
+            "node": "IF Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Found?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Found Reply + Counters",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Found Reply + Counters": {
+      "main": [
+        [
+          {
+            "node": "Telegram Reply (Found)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Row (lookups + last_seen)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Telegram Reply (New)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append New Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Normalize (user_id + key)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "6f456b99-f032-44bc-b5da-2c00a47fe142",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2214a042eb3154f2274e6e3265a1e2e050297f72ee4758a8d9473c4a8978ff3a"
+  },
+  "id": "1FTpQHeHsfDeyKcpoIn5f",
+  "tags": []
+}
